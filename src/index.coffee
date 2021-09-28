@@ -81,4 +81,4 @@ module.exports = (@robot) ->
         }
       }
 
-      res.reply reply
+      res.send reply
