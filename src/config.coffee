@@ -72,7 +72,7 @@ class Config
         podRestartCount = 0
         podReadyCount = 0
         podCount = 0
-        for cs in containerStatuses
+        for cs in (containerStatuses || [])
           {restartCount, ready, image} = cs
           podRestartCount = podRestartCount + restartCount
           podCount = podCount + 1
