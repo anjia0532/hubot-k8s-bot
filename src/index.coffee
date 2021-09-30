@@ -69,16 +69,11 @@ module.exports = (@robot) ->
         robot.logger.error err
         return res.send "Could not fetch logs for pod *#{pod}* in namespace *#{namespace}* with context *#{context}*"
       return res.reply "Requested *logs* not found for pod *#{pod}* in namespace *#{namespace}* with context *#{context}*" unless response
-      reply = {
-        "message": "Here are latest logs from pod *#{pod}* in namespace *#{namespace}* with context *#{context}*\n",
-        "props": {
-          "attachments": [
-            {
-              "pretext": "Attachment - ",
-              "text": "#{response}\n"
-            }
-          ]
-        }
+
+      opts = {
+        content: "#{response}\n"
+        title: "Here are latest logs from pod *#{pod}* in namespace *#{namespace}* with context *#{context}*\n",
+        channels: res.message.room
       }
 
-      res.send reply
+      robot.adapter.client.web.files.upload(pod, opts)

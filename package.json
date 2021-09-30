@@ -1,7 +1,7 @@
 {
-  "name": "hubot-k8s",
+  "name": "@astami/hubot-k8s",
   "description": "A hubot script for interacting with kubernetes",
-  "version": "0.1.0-1b",
+  "version": "0.1.0-3b",
   "author": "Kevin Schmidt <kevin@kevinschmidt.biz>",
   "license": "MIT",
   "keywords": [
@@ -12,10 +12,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:kevinschmidt/hubot-k8s.git"
+    "url": "git@github.com:astamiviswakarma/hubot-k8s.git"
   },
   "bugs": {
-    "url": "https://github.com/kevinschmidt/hubot-k8s/issues"
+    "url": "https://github.com/astamiviswakarma/hubot-k8s/issues"
   },
   "dependencies": {
     "coffee-script": "^1.10.0",
@@ -26,6 +26,6 @@
   "scripts": {
     "test": "script/test"
   },
-  "homepage": "https://github.com/kevinschmidt/hubot-k8s",
+  "homepage": "https://github.com/astamiviswakarma/hubot-k8s",
   "devDependencies": {}
 }
