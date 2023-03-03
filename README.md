@@ -1,40 +1,57 @@
-# Hubot Kubernetes Bot
-Let's you connect to multiple kubernetes environments and interact with them.
+# Hubot Kubernetes Bot 机器人
 
-Thanks to https://github.com/canthefason/hubot-kubernetes for the inspiration.
+支持多 K8S 集群并与其交互。
 
-### Configuration:
+## 配置
+
 - `HUBOT_K8S_CONTEXTS` `{"prod":{"server":"https://kubernetes.cluster.io","ca":"./ca.crt","dashboardPrefix":"https://kubernetes.cluster.io","token":"<kubernetes token>"}}`
 - `HUBOT_K8S_DEFAULT_CONTEXT` - Default context (from above config)
 - `HUBOT_K8S_DEFAULT_NAMESPACE` - Default namespace in Kubernetes
 
-### Commands:
+## 命令:
 
 All commands operate in the currently selected namespace and context. All commands with label selectors accept it in the form `label=value`.
 
-#### Display Current Kubernetes Context
+### 列出所有命令
+> k8s help
+
+### 列出 Kubernetes 集群
 > k8s context
 
-#### Switching Kubernetes Context
+### 切换 Kubernetes 集群
 > k8s context `<context>`
 
-#### Display Current Kubernetes Namespace
+### 列出 Kubernetes 命名空间
 > k8s namespace|ns
 
-#### Switching Kubernetes Namespace
+### 切换 Kubernetes 命名空间
 > k8s namespace|ns `<namespace>`
 
-#### List Deployments
+### 列出 Deployments
 > k8s deployments|deploy [`<labelSelector>`]
 
-#### List Services
+### 列出 Statefulsets
+> k8s statefulsets|sts [`<labelSelector>`]
+
+### 列出 Nodes
+> k8s nodes|no [`<labelSelector>`]
+
+### 列出 Services
 > k8s services|svc [`<labelSelector>`]
 
-#### List Cron Jobs
-> k8s cronjobs [`<labelSelector>`]
+### 列出 Cron Jobs
+> k8s cronjobs|cj [`<labelSelector>`]
 
-#### List Jobs
+### 列出 Jobs
 > k8s jobs [`<labelSelector>`]
 
-#### Get logs from a pod
+### 列出 Pods
+> k8s pods|po [`<labelSelector>`]
+
+### 获取日志
 > k8s logs|log `<pod name>`
+
+## 鸣谢
+
+- https://github.com/astamiviswakarma/hubot-k8s
+- https://github.com/canthefason/hubot-kubernetes

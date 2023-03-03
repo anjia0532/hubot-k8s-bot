@@ -2,7 +2,7 @@ class KubeApi
   request = require 'request'
 
   constructor: (contextConfig) ->
-    caFile = contextConfig['ca']
+    caFile = contextConfig['ca']?
     if caFile and caFile != ""
       fs = require('fs')
       path = require('path')
@@ -12,7 +12,7 @@ class KubeApi
 
   get: ({path, roles}, callback) ->
     requestOptions =
-      url : @urlPrefix + path
+      url: @urlPrefix + path
 
     requestOptions['auth'] =
       bearer: @token
@@ -26,10 +26,37 @@ class KubeApi
       if response.statusCode == 404
         return callback null, null
       if response.statusCode != 200
-        return callback new Error("Error executing request: #{response.statusCode} #{data}")
-      if data.startsWith "{"
+        return callback new Error("请求 k8s api 报错: #{response.statusCode}" + JSON.stringify(data))
+      if typeof data 'string' && (data.startsWith "{" || data.startsWith "[")
         callback null, JSON.parse(data)
       else
         callback null, data
+
+  patch: ({body, path, roles}, callback) ->
+    requestOptions =
+      url: @urlPrefix + path
+
+    if body
+      requestOptions.body = body
+
+    requestOptions['method'] = "PATCH"
+    requestOptions['json'] = true
+    requestOptions['headers'] = {"content-type": "application/merge-patch+json"}
+
+    requestOptions['auth'] =
+      bearer: @token
+
+    if @ca
+      requestOptions.agentOptions =
+        ca: @ca
+
+    request requestOptions, (err, response, data) ->
+      return callback(err) if err
+      if response.statusCode == 404
+        return callback null, null
+      if response.statusCode != 200
+        return callback new Error("请求 k8s api 报错: #{response.statusCode}" + JSON.stringify(data))
+      callback null, data
+
 
 module.exports = KubeApi

@@ -14,16 +14,32 @@ class Config
     "deploy": "deployments"
     "po": "pods"
     "svc": "services"
+    "sts": "statefulsets"
+    "no": "nodes"
+    "cj": "cronjobs"
 
   @resourceApiPrefix =
-    "deployments": "/apis/extensions/v1beta1"
+    "deployments": "/apis/apps/v1"
+    "statefulsets": "/apis/apps/v1"
     "jobs": "/apis/batch/v1"
-    "cronjobs": "/apis/batch/v1beta1"
+    "cronjobs": "/apis/batch/v1"
 
   @getContext = (res) ->
     user = res.message.user.id
     key = "#{user}.context"
     return robot.brain.get(key) or @defaultContext
+
+  @getContexts = (res) ->
+    user = res.message.user.id
+    key = "#{user}.context"
+    currentContext = robot.brain.get(key) or @defaultContext
+    context = ""
+    for k,v of @contexts
+      if (k == currentContext)
+        context += "* "
+      context += "#{k}  \n  "
+    return context
+
 
   @setContext = (res, context) ->
     user = res.message.user.id
@@ -40,20 +56,42 @@ class Config
     key = "#{user}.namespace"
     return robot.brain.set(key, namespace or @defaultNamespace)
 
+
+#    "daemonsets": "apps.daemonset"
   @responses =
     'cronjobs': (response, dashboardPrefix) ->
       reply = ''
       for cronjob in response.items
         {metadata: {name, namespace}, spec: {schedule, suspend}, status: {lastScheduleTime}} = cronjob
-        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/cronjob/#{namespace}/#{name}?namespace=#{namespace}|#{name}>* - "
-        reply += "schedule `#{schedule}` and suspended `#{suspend}` last scheduled `#{moment(lastScheduleTime).fromNow()}`\n"
+        reply += "- [/#{namespace}/#{name}/cronjobs](#{dashboardPrefix}/batch.cronjob/#{namespace}/#{name}) - "
+        reply += "调度时间 `#{schedule}` 是否挂起 `#{suspend}` 最后调度时间 `#{moment(lastScheduleTime).fromNow()}`  \n  "
+      return reply
+    'nodes': (response, dashboardPrefix) ->
+      reply = ''
+      for nodes in response.items
+        {metadata: {name}, nodeInfo: {osImage, containerRuntimeVersion, kubeletVersion}} = node
+        reply += "- [/#{name}/nodes](#{dashboardPrefix}/node}/#{name}) - "
+        reply += "系统镜像 `#{osImage}` container版本 `#{containerRuntimeVersion}` kubelet版本 `#{kubeletVersion}`  \n  "
       return reply
     'deployments': (response, dashboardPrefix) ->
       reply = ''
       for deployment in response.items
-        {metadata: {name, namespace}, status: {replicas, updatedReplicas, readyReplicas, availableReplicas}} = deployment
-        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/deployment/#{namespace}/#{name}?namespace=#{namespace}|#{name}>* - "
-        reply += "desired `#{replicas}`, current `#{readyReplicas}`, updated `#{updatedReplicas}`, available `#{availableReplicas}`\n"
+        {
+          metadata: {name, namespace},
+          status: {replicas, updatedReplicas, readyReplicas, availableReplicas}
+        } = deployment
+        reply += "- [/#{namespace}/#{name}/deployments](#{dashboardPrefix}/apps.deployment/#{namespace}/#{name}) - "
+        reply += "目标副本 `#{replicas}` 就绪副本 `#{readyReplicas}` 更新副本 `#{updatedReplicas}` 可用副本 `#{availableReplicas}` \n  "
+      return reply
+    'statefulsets': (response, dashboardPrefix) ->
+      reply = ''
+      for statefulsets in response.items
+        {
+          metadata: {name, namespace},
+          status: {replicas, updatedReplicas, readyReplicas, availableReplicas}
+        } = statefulsets
+        reply += "- [/#{namespace}/#{name}/statefulsets](#{dashboardPrefix}/apps.statefulset/#{namespace}/#{name}) - "
+        reply += "目标副本 `#{replicas}` 就绪副本 `#{readyReplicas}` 更新副本 `#{updatedReplicas}` 可用副本 `#{availableReplicas}` \n  "
       return reply
     'jobs': (response, dashboardPrefix) ->
       reply = ''
@@ -62,8 +100,8 @@ class Config
         statuses = []
         for condition in conditions
           statuses.push condition.type
-        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/job/#{namespace}/#{name}?namespace=#{namespace}|#{name}>* - "
-        reply += "last started `#{moment(startTime).fromNow()}` with status `#{statuses.join(" ")}`\n"
+        reply += "- [/#{namespace}/#{name}/jobs](#{dashboardPrefix}/batch.job/#{namespace}/#{name}) - "
+        reply += "最后开始时间`#{moment(startTime).fromNow()}` 状态 `#{statuses.join(" ")}`  \n  "
       return reply
     'pods': (response, dashboardPrefix) ->
       reply = ''
@@ -77,8 +115,8 @@ class Config
           podRestartCount = podRestartCount + restartCount
           podCount = podCount + 1
           if ready then podReadyCount = podReadyCount + 1
-        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/pod/#{namespace}/#{name}?namespace=#{namespace}|#{name}>* - "
-        reply += "pods `#{podReadyCount}/#{podCount}` with status `#{phase}` and restart count `#{restartCount}` since `#{moment(startTime).fromNow()}`\n"
+        reply += "- [/#{namespace}/#{name}/pods](#{dashboardPrefix}/pod/#{namespace}/#{name}) - "
+        reply += "pod名称 `#{name}` pods `#{podReadyCount}/#{podCount}` 状态 `#{phase}` 重启次数 `#{restartCount}` 开始时间 `#{moment(startTime).fromNow()}`  \n  "
       return reply
     'services': (response, dashboardPrefix) ->
       reply = ''
@@ -90,8 +128,8 @@ class Config
           {protocol, port, nodePort} = p
           internalPorts.push "#{port}/#{protocol}"
           nodePorts.push "#{nodePort}/#{protocol}"
-        reply += ">*<#{dashboardPrefix}/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/#!/service/#{namespace}/#{name}?namespace=#{namespace}|#{name}>* - "
-        reply += "ports `#{internalPorts.join(" ")}` and node ports `#{nodePorts.join(" ")}` with cluster ip `#{clusterIP}`\n"
+        reply += "- [/#{namespace}/#{name}/services](#{dashboardPrefix}/service/#{namespace}/#{name}) - "
+        reply += "端口 `#{internalPorts.join(" ")}` 主机端口 `#{nodePorts.join(" ")}` 集群ip `#{clusterIP}`  \n  "
       return reply
 
 module.exports = Config

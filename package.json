@@ -1,8 +1,8 @@
 {
-  "name": "@astami/hubot-k8s",
+  "name": "hubot-k8s-bot",
   "description": "A hubot script for interacting with kubernetes",
-  "version": "0.1.0-3b",
-  "author": "Kevin Schmidt <kevin@kevinschmidt.biz>",
+  "version": "0.1.1-b26",
+  "author": "AnJia <anjia0532@gmail.com>",
   "license": "MIT",
   "keywords": [
     "hubot",
@@ -12,10 +12,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:astamiviswakarma/hubot-k8s.git"
+    "url": "git@github.com:anjia0532/hubot-k8s-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/astamiviswakarma/hubot-k8s/issues"
+    "url": "https://github.com/anjia0532/hubot-k8s-bot/issues"
   },
   "dependencies": {
     "coffee-script": "^1.10.0",
@@ -26,6 +26,6 @@
   "scripts": {
     "test": "script/test"
   },
-  "homepage": "https://github.com/astamiviswakarma/hubot-k8s",
+  "homepage": "https://github.com/anjia0532/hubot-k8s-bot",
   "devDependencies": {}
 }
