@@ -69,8 +69,8 @@ class Config
     'nodes': (response, dashboardPrefix) ->
       reply = ''
       for nodes in response.items
-        {metadata: {name}, nodeInfo: {osImage, containerRuntimeVersion, kubeletVersion}} = node
-        reply += "- [/#{name}/nodes](#{dashboardPrefix}/node}/#{name}) - "
+        {metadata: {name}, status: {nodeInfo: {osImage, containerRuntimeVersion, kubeletVersion}}} = nodes
+        reply += "- [/#{name}/nodes](#{dashboardPrefix}/node/#{name}) - "
         reply += "系统镜像 `#{osImage}` container版本 `#{containerRuntimeVersion}` kubelet版本 `#{kubeletVersion}`  \n  "
       return reply
     'deployments': (response, dashboardPrefix) ->
@@ -88,10 +88,10 @@ class Config
       for statefulsets in response.items
         {
           metadata: {name, namespace},
-          status: {replicas, updatedReplicas, readyReplicas, availableReplicas}
+          status: {replicas, updatedReplicas, readyReplicas, currentReplicas}
         } = statefulsets
         reply += "- [/#{namespace}/#{name}/statefulsets](#{dashboardPrefix}/apps.statefulset/#{namespace}/#{name}) - "
-        reply += "目标副本 `#{replicas}` 就绪副本 `#{readyReplicas}` 更新副本 `#{updatedReplicas}` 可用副本 `#{availableReplicas}` \n  "
+        reply += "目标副本 `#{replicas}` 就绪副本 `#{readyReplicas}` 更新副本 `#{updatedReplicas}` 当前副本 `#{currentReplicas}` \n  "
       return reply
     'jobs': (response, dashboardPrefix) ->
       reply = ''

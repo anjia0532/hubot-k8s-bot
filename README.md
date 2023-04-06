@@ -42,6 +42,10 @@ All commands operate in the currently selected namespace and context. All comman
 ### 列出 Cron Jobs
 > k8s cronjobs|cj [`<labelSelector>`]
 
+### 扩缩容指定资源的为指定数量
+例如 k8s scale deployment nginx-app 3
+> k8s scale resource resourcename count 
+
 ### 列出 Jobs
 > k8s jobs [`<labelSelector>`]
 

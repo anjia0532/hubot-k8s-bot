@@ -1,7 +1,7 @@
 {
   "name": "hubot-k8s-bot",
   "description": "A hubot script for interacting with kubernetes",
-  "version": "0.1.1-b26",
+  "version": "0.1.2-b2",
   "author": "AnJia <anjia0532@gmail.com>",
   "license": "MIT",
   "keywords": [

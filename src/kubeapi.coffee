@@ -27,7 +27,7 @@ class KubeApi
         return callback null, null
       if response.statusCode != 200
         return callback new Error("请求 k8s api 报错: #{response.statusCode}" + JSON.stringify(data))
-      if typeof data 'string' && (data.startsWith "{" || data.startsWith "[")
+      if typeof data == 'string' and (data.startsWith "{" or data.startsWith "[")
         callback null, JSON.parse(data)
       else
         callback null, data

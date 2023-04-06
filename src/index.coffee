@@ -35,8 +35,9 @@ module.exports = (@robot) ->
       "**k8s context context** - 切换 k8s 集群",
       "**k8s namespace|ns** - 列出 k8s namespace 列表",
       "**k8s namespace|ns namespace** - 切换 k8s namespace",
-      "**k8s nodes|no** - 列出指定k8s集群下特定命名空间下的 nodes 列表",
+      "**k8s nodes|no** - 列出指定k8s集群下的 nodes 列表",
       "**k8s deployments|deploy** - 列出指定k8s集群下特定命名空间下的 deployments 列表",
+      "**k8s scale resource resourcename count ** - 扩缩容指定资源的为指定数量，例如 k8s scale deployment nginx-app 3",
       "**k8s statefulsets|sts** - 列出指定k8s集群下特定命名空间下的 statefulsets 列表",
       "**k8s pods|po** - 列出指定k8s集群下特定命名空间下的 pods 列表",
       "**k8s services|svc** - 列出指定k8s集群下特定命名空间下的 services 列表",
@@ -71,7 +72,7 @@ module.exports = (@robot) ->
       res.reply "Kubernetes 集群: #{Config.getContext(res)}, namespace 切换为: #{namespace}"
 
 
-  robot.respond /k8s\s*(deployments|deploy|statefulsets|sts|nodes|no|pods|po|services|svc|cronjobs|cj|jobs)\s*(.+)?/i, (res) ->
+  robot.respond /k8s\s*(deployments|deploy|statefulsets|sts|pods|po|services|svc|cronjobs|cj|jobs)\s*(.+)?/i, (res) ->
 # kubectl get pods -n kube-system -l=tier=control-plane --v=8 打印请求url
     kubeapi = getKubeApi(res)
     namespace = Config.getNamespace(res)
@@ -93,6 +94,25 @@ module.exports = (@robot) ->
       return res.reply "请求 **#{resource}** labelSelector: **#{res.match[2]}** 未找到资源，集群为：**#{context}** 命名空间为：**#{namespace}**" unless response and response.items and response.items.length
       responseFormat = Config.responses[resource] or ->
       reply = "以下是 **#{context}** 集群，**#{namespace}** 命名空间下的 **#{resource}** 列表:  \n  "
+      reply += responseFormat(response, contextConfig.dashboardPrefix)
+      res.reply reply
+
+  robot.respond /k8s\s*(nodes|no)\s*(.+)?/i, (res) ->
+    context = Config.getContext(res)
+    contextConfig = Config.contexts[context]
+    resource = res.match[1]
+
+    url = "/api/v1/nodes"
+    kubeapi = new KubeApi(contextConfig)
+    kubeapi.get {path: url}, (err, response) ->
+      robot.logger.debug "请求 *#{resource}* url: #{url}"
+      if err
+        robot.logger.error err
+        return res.send "拉取 nodes 失败，集群为：**#{context}**"
+      return res.reply "未找到 nodes， 集群为：**#{context}**" unless response
+
+      responseFormat = Config.responses[resource] or ->
+      reply = "以下是 **#{context}** 集群下的 **#{resource}** 列表:  \n  "
       reply += responseFormat(response, contextConfig.dashboardPrefix)
       res.reply reply
 
